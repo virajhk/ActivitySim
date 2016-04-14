@@ -423,7 +423,7 @@ public class ActivityDetection {
                     isLinearUpdated = false;
                     isGyroUpdated = false;
                     currentState = "WALKING";
-                } else if ( isLinearUpdated && linearValue <= 1.5 && lightValue < 300.0 && locValue < 1 && (currentState != "IDLE_OUTDOOR") ) {
+                } else if ( isLinearUpdated && linearValue <= 1.5 && lightValue < 300.0 && locValue < 1 ) {
                     ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_INDOOR );
                     isLightUpdated = false;
                     isLinearUpdated = false;
