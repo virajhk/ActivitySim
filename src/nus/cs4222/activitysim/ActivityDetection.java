@@ -327,6 +327,8 @@ public class ActivityDetection {
 
     private int delayCount = 0;
 
+    private int[] statesArray = new int[5];
+
     private boolean isIdle = false;
 
     private boolean isWalking = false;
@@ -407,63 +409,76 @@ public class ActivityDetection {
 
 
                 if ( isAcclUpdated && isLocUpdated && locValue >= 2.5 ) {
-                    //ActivitySimulator.outputDetectedActivity( UserActivities.BUS );
+                    ActivitySimulator.outputDetectedActivity( UserActivities.BUS );
                     isLocUpdated = false;
                     isAcclUpdated = false;
                     isLinearUpdated = false;
                     isGyroUpdated = false;
                     currentState = "BUS";
-                } else if ( isAcclUpdated && isLocUpdated && isLinearUpdated && linearValue >= 1 && locValue >= 1.5 && locValue < 3 && lightValue >= 300.0 ) {
-                    //ActivitySimulator.outputDetectedActivity( UserActivities.JOGGING );
-                    isLocUpdated = false;
-                    isAcclUpdated = false;
+                } else if ( isLinearUpdated && linearValue <= 1.5 && lightValue < 150.0 && locValue < 1.5 ) {
+                    ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_INDOOR );
+                    isLightUpdated = false;
                     isLinearUpdated = false;
                     isGyroUpdated = false;
-                    currentState = "JOGGING";
-                } else if ( isAcclUpdated && isLocUpdated && isLinearUpdated && linearValue >= 1.85 && locValue < 1.5 ) {
-                    //ActivitySimulator.outputDetectedActivity( UserActivities.WALKING );
+                    currentState = "IDLE_INDOOR";
+                } else if ( isAcclUpdated && isLinearUpdated && linearValue >= 1.85 && locValue < 1.5 && lightValue > 0.0 ) {
+                    ActivitySimulator.outputDetectedActivity( UserActivities.WALKING );
                     System.out.println( linearValue );
                     isLocUpdated = false;
                     isAcclUpdated = false;
                     isLinearUpdated = false;
                     isGyroUpdated = false;
                     currentState = "WALKING";
-                } else if ( isLinearUpdated && linearValue <= 1.5 && lightValue < 300.0 && locValue < 1 ) {
-                    //ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_INDOOR );
-                    isLightUpdated = false;
-                    isLinearUpdated = false;
-                    isGyroUpdated = false;
-                    currentState = "IDLE_INDOOR";
-                } else if ( isLinearUpdated && linearValue <= 0.5 && lightValue >= 300.0 && locValue < 1 && (currentState != "IDLE_INDOOR") ) {
-                    //ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_OUTDOOR );
+                } else if ( isLinearUpdated && linearValue <= 0.5 && lightValue >= 150.0 && locValue < 1 && (currentState != "IDLE_INDOOR") ) {
+                    ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_OUTDOOR );
                     isLightUpdated = false;
                     isLinearUpdated = false;
                     isGyroUpdated = false;
                     currentState = "IDLE_OUTDOOR";
                 }
 
-
                 if (delayCount == 0) {
-                    prevState = currentState;
-                    delayCount++;
-                } else if (delayCount < 5) {
+                    statesArray = new int[]{0,0,0,0,0};
+                }
+
+                /*if (delayCount < 2) {
+                    if (currentState == "BUS") {
+                        statesArray[0]++;
+                    } else if (currentState == "WALKING") {
+                        statesArray[1]++;
+                    } else if (currentState == "IDLE_INDOOR") {
+                        statesArray[2]++;
+                    } else if (currentState == "IDLE_OUTDOOR") {
+                        statesArray[3]++;
+                    } else {
+                        statesArray[4]++;
+                    }
                     delayCount++;
                 } else {
                     delayCount = 0;
-                    if (prevState == currentState) {
-                        if (currentState == "BUS") {
-                            ActivitySimulator.outputDetectedActivity( UserActivities.BUS );
-                        } else if (currentState == "WALKING") {
-                            ActivitySimulator.outputDetectedActivity( UserActivities.WALKING );
-                        } else if (currentState == "IDLE_INDOOR") {
-                            ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_INDOOR );
-                        } else if (currentState == "IDLE_OUTDOOR") {
-                            ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_OUTDOOR );
-                        } else {
-                            ActivitySimulator.oututDetectedActivity( UserActivities.JOGGING )
+                    int maxCount = 0;
+                    int maxState = 0;
+                    maxCount = statesArray[0];
+                    for (int i=1; i<statesArray.length; i++) {
+                        if (statesArray[i] > maxCount) {
+                            maxCount = statesArray[i];
+                            maxState = i;
                         }
                     }
-                }
+                    if (maxState == 0) {
+                        ActivitySimulator.outputDetectedActivity( UserActivities.BUS );
+                    } else if (maxState == 1) {
+                        ActivitySimulator.outputDetectedActivity( UserActivities.WALKING );
+                    } else if (maxState == 2) {
+                        ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_INDOOR );
+                    } else if (maxState == 3) {
+                        ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_OUTDOOR );
+                    } else {
+                        ActivitySimulator.outputDetectedActivity( UserActivities.JOGGING );
+                    }
+
+                    statesArray = new int[]{0,0,0,0,0};
+                }*/
                 // Set the next timer to execute the same task 10 min later
                 ++numberTimers;
                 SimulatorTimer timer = new SimulatorTimer();
