@@ -325,11 +325,14 @@ public class ActivityDetection {
     private float gyroValue = 0;
     private int numberTimers = 1;
 
+    private int delayCount = 0;
+
     private boolean isIdle = false;
 
     private boolean isWalking = false;
 
-    private String currentState = "WALKING";
+    private String currentState = "";
+    private String prevState = "";
 
     public static int mean (int start, int end, float[] accelerationVals){
         float sum = 0;
@@ -401,22 +404,24 @@ public class ActivityDetection {
                     isFirstAcclReading = false;
                 }*/
 
+
+
                 if ( isAcclUpdated && isLocUpdated && locValue >= 2.5 ) {
-                    ActivitySimulator.outputDetectedActivity( UserActivities.BUS );
+                    //ActivitySimulator.outputDetectedActivity( UserActivities.BUS );
                     isLocUpdated = false;
                     isAcclUpdated = false;
                     isLinearUpdated = false;
                     isGyroUpdated = false;
                     currentState = "BUS";
                 } else if ( isAcclUpdated && isLocUpdated && isLinearUpdated && linearValue >= 1 && locValue >= 1.5 && locValue < 3 && lightValue >= 300.0 ) {
-                    ActivitySimulator.outputDetectedActivity( UserActivities.JOGGING );
+                    //ActivitySimulator.outputDetectedActivity( UserActivities.JOGGING );
                     isLocUpdated = false;
                     isAcclUpdated = false;
                     isLinearUpdated = false;
                     isGyroUpdated = false;
                     currentState = "JOGGING";
                 } else if ( isAcclUpdated && isLocUpdated && isLinearUpdated && linearValue >= 1.85 && locValue < 1.5 ) {
-                    ActivitySimulator.outputDetectedActivity( UserActivities.WALKING );
+                    //ActivitySimulator.outputDetectedActivity( UserActivities.WALKING );
                     System.out.println( linearValue );
                     isLocUpdated = false;
                     isAcclUpdated = false;
@@ -424,19 +429,41 @@ public class ActivityDetection {
                     isGyroUpdated = false;
                     currentState = "WALKING";
                 } else if ( isLinearUpdated && linearValue <= 1.5 && lightValue < 300.0 && locValue < 1 ) {
-                    ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_INDOOR );
+                    //ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_INDOOR );
                     isLightUpdated = false;
                     isLinearUpdated = false;
                     isGyroUpdated = false;
                     currentState = "IDLE_INDOOR";
                 } else if ( isLinearUpdated && linearValue <= 0.5 && lightValue >= 300.0 && locValue < 1 && (currentState != "IDLE_INDOOR") ) {
-                    ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_OUTDOOR );
+                    //ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_OUTDOOR );
                     isLightUpdated = false;
                     isLinearUpdated = false;
                     isGyroUpdated = false;
                     currentState = "IDLE_OUTDOOR";
                 }
 
+
+                if (delayCount == 0) {
+                    prevState = currentState;
+                    delayCount++;
+                } else if (delayCount < 5) {
+                    delayCount++;
+                } else {
+                    delayCount = 0;
+                    if (prevState == currentState) {
+                        if (currentState == "BUS") {
+                            ActivitySimulator.outputDetectedActivity( UserActivities.BUS );
+                        } else if (currentState == "WALKING") {
+                            ActivitySimulator.outputDetectedActivity( UserActivities.WALKING );
+                        } else if (currentState == "IDLE_INDOOR") {
+                            ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_INDOOR );
+                        } else if (currentState == "IDLE_OUTDOOR") {
+                            ActivitySimulator.outputDetectedActivity( UserActivities.IDLE_OUTDOOR );
+                        } else {
+                            ActivitySimulator.oututDetectedActivity( UserActivities.JOGGING )
+                        }
+                    }
+                }
                 // Set the next timer to execute the same task 10 min later
                 ++numberTimers;
                 SimulatorTimer timer = new SimulatorTimer();
